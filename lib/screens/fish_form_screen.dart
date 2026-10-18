@@ -11,14 +11,28 @@ class _FishFormScreenState extends State<FishFormScreen> {
   // Key สำหรับตรวจสอบความถูกต้องของฟอร์ม
   final _formKey = GlobalKey<FormState>();
 
-  // ตัวแปรเก็บค่าจากฟอร์ม
+  // Controllers สำหรับ TextField
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _scientificNameController = TextEditingController();
   final TextEditingController _weightController = TextEditingController();
   
-  String _selectedDifficulty = 'ปานกลาง'; // สำหรับ Radio / Dropdown
+  // ตัวแปรสำหรับเก็บค่าฟอร์มต่างๆ
+  String _selectedDifficulty = 'ปานกลาง'; // สำหรับ Radio
+  String _selectedWaterType = 'น้ำจืดทั่วไป'; // สำหรับ Dropdown
   bool _isProtectedSpecies = false; // สำหรับ Checkbox
   bool _isAvailableForFishing = true; // สำหรับ Switch
+
+  // รายการตัวเลือกสำหรับ Dropdown
+  final List<String> _waterTypes = ['น้ำจืดทั่วไป', 'แม่น้ำ/เขื่อน', 'หนอง คลอง บึง', 'น้ำไหลเชี่ยว'];
+
+  @override
+  void dispose() {
+    // คืนทรัพยากรเมื่อปิดหน้าจอ
+    _nameController.dispose();
+    _scientificNameController.dispose();
+    _weightController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,15 +95,41 @@ class _FishFormScreenState extends State<FishFormScreen> {
               ),
               const SizedBox(height: 20),
 
-              // 4. Radio: เลือกระดับความยากในการตกปลา
+              // 4. DropdownButtonFormField: เลือกประเภทแหล่งน้ำ
+              DropdownButtonFormField<String>(
+                value: _selectedWaterType,
+                dropdownColor: const Color(0xFF1E293B),
+                style: const TextStyle(color: Colors.white),
+                decoration: const InputDecoration(
+                  labelText: 'ประเภทแหล่งน้ำที่อยู่อาศัย',
+                  labelStyle: TextStyle(color: Colors.grey),
+                  enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.grey)),
+                  focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.cyan)),
+                ),
+                items: _waterTypes.map((String type) {
+                  return DropdownMenuItem<String>(
+                    value: type,
+                    child: Text(type, style: const TextStyle(color: Colors.white)),
+                  );
+                }).toList(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    _selectedWaterType = newValue!;
+                  });
+                },
+              ),
+              const SizedBox(height: 20),
+
+              // 5. Radio: เลือกระดับความยากในการตกปลา
               const Text('ระดับความยากในการตก:', style: TextStyle(color: Colors.amber, fontWeight: FontWeight.bold)),
               Row(
                 children: [
                   Expanded(
                     child: RadioListTile<String>(
-                      title: const Text('ง่าย', style: TextStyle(color: Colors.white)),
+                      title: const Text('ง่าย', style: TextStyle(color: Colors.white, fontSize: 14)),
                       value: 'ง่าย',
                       groupValue: _selectedDifficulty,
+                      contentPadding: EdgeInsets.zero,
                       onChanged: (value) {
                         setState(() {
                           _selectedDifficulty = value!;
@@ -99,9 +139,10 @@ class _FishFormScreenState extends State<FishFormScreen> {
                   ),
                   Expanded(
                     child: RadioListTile<String>(
-                      title: const Text('ปานกลาง', style: TextStyle(color: Colors.white)),
+                      title: const Text('ปานกลาง', style: TextStyle(color: Colors.white, fontSize: 14)),
                       value: 'ปานกลาง',
                       groupValue: _selectedDifficulty,
+                      contentPadding: EdgeInsets.zero,
                       onChanged: (value) {
                         setState(() {
                           _selectedDifficulty = value!;
@@ -111,9 +152,10 @@ class _FishFormScreenState extends State<FishFormScreen> {
                   ),
                   Expanded(
                     child: RadioListTile<String>(
-                      title: const Text('ยาก', style: TextStyle(color: Colors.white)),
+                      title: const Text('ยาก', style: TextStyle(color: Colors.white, fontSize: 14)),
                       value: 'ยาก',
                       groupValue: _selectedDifficulty,
+                      contentPadding: EdgeInsets.zero,
                       onChanged: (value) {
                         setState(() {
                           _selectedDifficulty = value!;
@@ -125,11 +167,12 @@ class _FishFormScreenState extends State<FishFormScreen> {
               ),
               const SizedBox(height: 10),
 
-              // 5. Checkbox: ปลาคุ้มครอง / ปลาหายาก
+              // 6. Checkbox: ปลาคุ้มครอง / ปลาหายาก
               CheckboxListTile(
                 title: const Text('เป็นปลาคุ้มครอง / ห้ามล่า', style: TextStyle(color: Colors.white)),
                 value: _isProtectedSpecies,
                 activeColor: Colors.cyan,
+                contentPadding: EdgeInsets.zero,
                 onChanged: (bool? value) {
                   setState(() {
                     _isProtectedSpecies = value ?? false;
@@ -137,11 +180,12 @@ class _FishFormScreenState extends State<FishFormScreen> {
                 },
               ),
 
-              // 6. Switch: อนุญาตให้ตกได้หรือไม่
+              // 7. Switch: อนุญาตให้ตกได้หรือไม่
               SwitchListTile(
                 title: const Text('เปิดให้ตกในฤดูกาลนี้', style: TextStyle(color: Colors.white)),
                 value: _isAvailableForFishing,
                 activeColor: Colors.cyan,
+                contentPadding: EdgeInsets.zero,
                 onChanged: (bool value) {
                   setState(() {
                     _isAvailableForFishing = value;
@@ -158,7 +202,6 @@ class _FishFormScreenState extends State<FishFormScreen> {
                 ),
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                    // ถ้าผ่านการตรวจสอบ ให้แสดง SnackBar แจ้งเตือน
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(content: Text('บันทึกข้อมูล "${_nameController.text}" สำเร็จ!')),
                     );
