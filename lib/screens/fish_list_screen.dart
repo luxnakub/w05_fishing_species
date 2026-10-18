@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/fish_data.dart';
 import 'fish_detail_screen.dart';
+import 'fish_form_screen.dart'; // นำเข้าหน้าฟอร์มที่เราสร้างขึ้น
 
 class FishListScreen extends StatelessWidget {
   const FishListScreen({super.key});
@@ -9,7 +10,7 @@ class FishListScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('สปีชีส์ปลาและข้อมูลการตกปลา (W05)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text('สปีชีส์ปลาและข้อมูลการตกปลา (W06)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF1E293B),
       ),
       backgroundColor: const Color(0xFF0F172A),
@@ -45,6 +46,19 @@ class FishListScreen extends StatelessWidget {
                   ),
                 );
               },
+            ),
+          );
+        },
+      ),
+      // ปุ่มลอยมุมขวาล่าง สำหรับกดเปิดหน้าฟอร์มเพิ่มข้อมูลปลา
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.cyan,
+        child: const Icon(Icons.add, color: Colors.black),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const FishFormScreen(),
             ),
           );
         },
